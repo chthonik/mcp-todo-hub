@@ -3,6 +3,7 @@ let todos = [];
 let categories = [];
 let currentView = 'all';
 let searchQuery = '';
+let lastTodosJSON = '';
 
 // ─── Init ───
 document.addEventListener('DOMContentLoaded', () => {
@@ -64,7 +65,11 @@ async function loadTodos() {
     }
     if (searchQuery) params.set('search', searchQuery);
 
-    todos = await api(`/todos?${params.toString()}`);
+    const newTodos = await api(`/todos?${params.toString()}`);
+    const newJSON = JSON.stringify(newTodos);
+    if (newJSON === lastTodosJSON) return;
+    lastTodosJSON = newJSON;
+    todos = newTodos;
     renderTodos();
 }
 
