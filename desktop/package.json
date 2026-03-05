@@ -1,0 +1,12 @@
+{
+  "name": "mcp-todo-hub-desktop",
+  "version": "1.0.0",
+  "description": "Desktop app for MCP Todo Hub",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --no-sandbox"
+  },
+  "dependencies": {
+    "electron": "^33.0.0"
+  }
+}

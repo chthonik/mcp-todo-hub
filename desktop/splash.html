@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Todo Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: #ededed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .splash {
+            text-align: center;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-wrap {
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            color: #ededed;
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.04);
+            }
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .status {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 28px;
+            min-height: 20px;
+        }
+
+        .status.error {
+            color: #e03131;
+        }
+
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 2.5px solid #333;
+            border-top-color: #ededed;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .retry-btn {
+            display: none;
+            padding: 10px 32px;
+            background: #ededed;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .retry-btn:hover {
+            background: #fff;
+            transform: translateY(-1px);
+        }
+
+        .retry-btn.visible {
+            display: inline-block;
+        }
+
+        .hint {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .hint code {
+            background: #2a2a2a;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="splash">
+        <div class="logo-wrap">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <g transform="translate(12, 12)">
+                    <polygon points="0,-9 7.794,-4.5 7.794,4.5 0,9 -7.794,4.5 -7.794,-4.5" fill="none"
+                        stroke="currentColor" />
+                    <line x1="0" y1="-9" x2="0" y2="-4.5" />
+                    <line x1="7.794" y1="-4.5" x2="3.897" y2="-2.25" />
+                    <line x1="7.794" y1="4.5" x2="3.897" y2="2.25" />
+                    <line x1="0" y1="9" x2="0" y2="4.5" />
+                    <line x1="-7.794" y1="4.5" x2="-3.897" y2="2.25" />
+                    <line x1="-7.794" y1="-4.5" x2="-3.897" y2="-2.25" />
+                    <polygon points="1.75,-3.031 3.5,0 1.75,3.031 -1.75,3.031 -3.5,0 -1.75,-3.031" fill="currentColor"
+                        stroke="none" />
+                    <circle cx="0" cy="-9" r="1.5" fill="currentColor" stroke="none" />
+                    <circle cx="7.794" cy="-4.5" r="1.5" fill="currentColor" stroke="none" />
+                    <circle cx="7.794" cy="4.5" r="1.5" fill="currentColor" stroke="none" />
+                    <circle cx="0" cy="9" r="1.5" fill="currentColor" stroke="none" />
+                    <circle cx="-7.794" cy="4.5" r="1.5" fill="currentColor" stroke="none" />
+                    <circle cx="-7.794" cy="-4.5" r="1.5" fill="currentColor" stroke="none" />
+                </g>
+            </svg>
+        </div>
+        <h1>Todo Hub</h1>
+        <div class="status" id="status-text">Connecting to server…</div>
+        <div class="spinner" id="spinner"></div>
+        <button class="retry-btn" id="retry-btn" onclick="retryConnection()">Retry Connection</button>
+        <div class="hint">Make sure the server is running: <code>cd mcp-todo-hub && npm run dev</code></div>
+    </div>
+    <script>
+        function retryConnection() {
+            if (window.electronAPI) {
+                window.electronAPI.retry();
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('status-text').textContent = msg || 'Could not connect to server';
+            document.getElementById('status-text').classList.add('error');
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('retry-btn').classList.add('visible');
+        }
+
+        // After 6 seconds with no redirect, show the error state
+        setTimeout(() => {
+            showError('Server not responding on localhost:3456');
+        }, 6000);
+    </script>
+</body>
+
+</html>
